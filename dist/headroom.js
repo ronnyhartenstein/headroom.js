@@ -134,6 +134,8 @@
     this.offset           = options.offset;
     this.scroller         = options.scroller;
     this.initialised      = false;
+    this.beforePin        = options.beforePin;
+    this.beforeUnpin      = options.beforeUnpin;
     this.onPin            = options.onPin;
     this.onUnpin          = options.onUnpin;
     this.onTop            = options.onTop;
@@ -152,7 +154,7 @@
   
       this.elem.classList.add(this.classes.initial);
   
-      // defer event registration to handle browser 
+      // defer event registration to handle browser
       // potentially restoring previous scroll position
       setTimeout(this.attachEvent.bind(this), 100);
   
@@ -183,15 +185,15 @@
         this.debouncer.handleEvent();
       }
     },
-    
+  
     /**
      * Unpins the header if it's currently pinned
      */
     unpin : function() {
       var classList = this.elem.classList,
         classes = this.classes;
-      
-      if(classList.contains(classes.pinned) || !classList.contains(classes.unpinned)) {
+  
+      if(this.beforeUnpin() && (classList.contains(classes.pinned) || !classList.contains(classes.unpinned))) {
         classList.add(classes.unpinned);
         classList.remove(classes.pinned);
         this.onUnpin && this.onUnpin.call(this);
@@ -204,8 +206,8 @@
     pin : function() {
       var classList = this.elem.classList,
         classes = this.classes;
-      
-      if(classList.contains(classes.unpinned)) {
+  
+      if(this.beforePin() && classList.contains(classes.unpinned)) {
         classList.remove(classes.unpinned);
         classList.add(classes.pinned);
         this.onPin && this.onPin.call(this);
@@ -218,7 +220,7 @@
     top : function() {
       var classList = this.elem.classList,
         classes = this.classes;
-      
+  
       if(!classList.contains(classes.top)) {
         classList.add(classes.top);
         classList.remove(classes.notTop);
@@ -232,7 +234,7 @@
     notTop : function() {
       var classList = this.elem.classList,
         classes = this.classes;
-      
+  
       if(!classList.contains(classes.notTop)) {
         classList.add(classes.notTop);
         classList.remove(classes.top);
@@ -272,7 +274,7 @@
     getDocumentHeight : function () {
       var body = document.body,
         documentElement = document.documentElement;
-    
+  
       return Math.max(
         body.scrollHeight, documentElement.scrollHeight,
         body.offsetHeight, documentElement.offsetHeight,
@@ -311,7 +313,7 @@
     isOutOfBounds : function (currentScrollY) {
       var pastTop  = currentScrollY < 0,
         pastBottom = currentScrollY + this.getViewportHeight() > this.getScrollerHeight();
-      
+  
       return pastTop || pastBottom;
     },
   
@@ -395,7 +397,9 @@
       top : 'headroom--top',
       notTop : 'headroom--not-top',
       initial : 'headroom'
-    }
+    },
+    beforePin : function() { return true; },
+    beforeUnpin : function() { return true; }
   };
   Headroom.cutsTheMustard = typeof features !== 'undefined' && features.rAF && features.bind && features.classList;
 
